@@ -1,6 +1,5 @@
 class Product:
     def __init__(self, name: str, price: float, quantity: int):
-        # Validierung der Eingabewerte
         if not name:
             raise ValueError("Der Produktname darf nicht leer sein.")
         if price < 0:
@@ -8,7 +7,6 @@ class Product:
         if quantity < 0:
             raise ValueError("Die Menge darf nicht negativ sein.")
 
-        # Instanzvariablen initialisieren
         self.name = name
         self.price = price
         self.quantity = quantity
@@ -21,7 +19,6 @@ class Product:
         if quantity < 0:
             raise ValueError("Die Menge darf nicht negativ sein.")
         self.quantity = quantity
-        # Wenn die Menge 0 erreicht, wird das Produkt automatisch deaktiviert
         if self.quantity == 0:
             self.deactivate()
 
@@ -43,26 +40,44 @@ class Product:
         if quantity > self.quantity:
             raise ValueError(f"Nicht genug Bestand. Es sind nur {self.quantity} Stück verfügbar.")
 
-        # Gesamtpreis berechnen
         total_price = self.price * quantity
-
-        # Bestand aktualisieren (nutzt den Setter, um ggf. zu deaktivieren)
         self.set_quantity(self.quantity - quantity)
-
         return float(total_price)
 
 
-# Test-Bereich für deine main-Funktion:
-if __name__ == "__main__":
-    bose = Product("Bose QuietComfort Earbuds", price=250, quantity=500)
-    mac = Product("MacBook Air M2", price=1450, quantity=100)
+class NonStockedProduct(Product):
+    def __init__(self, name: str, price: float):
+        super().__init__(name, price, quantity=0)
+        # Verhindert, dass das Produkt wegen der Menge 0 inaktiv startet
+        self.active = True
 
-    print(bose.buy(50))
-    print(mac.buy(100))
-    print(mac.is_active())
+    def set_quantity(self, quantity: int):
+        pass
 
-    bose.show()
-    mac.show()
+    def is_active(self) -> bool:
+        # Digitale Lizenzen sind immer aktiv und verfügbar
+        return True
 
-    bose.set_quantity(1000)
-    bose.show()
+    def buy(self, quantity: int) -> float:
+        if quantity <= 0:
+            raise ValueError("Die Kaufmenge muss größer als 0 sein.")
+        return float(self.price * quantity)
+
+    def show(self):
+        print(f"{self.name}, Price: {self.price}, Quantity: Unlimited")
+
+
+class LimitedProduct(Product):
+    def __init__(self, name: str, price: float, quantity: int, maximum: int):
+        super().__init__(name, price, quantity)
+        if maximum <= 0:
+            raise ValueError("Das maximale Bestelllimit muss größer als 0 sein.")
+        self.maximum = maximum
+
+    def buy(self, quantity: int) -> float:
+        if quantity > self.maximum:
+            raise ValueError(f"Dieses Produkt kann maximal {self.maximum} Mal pro Bestellung gekauft werden.")
+        return super().buy(quantity)
+
+    def show(self):
+        print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, Max per order: {self.maximum}")
