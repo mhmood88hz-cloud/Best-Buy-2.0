@@ -4,7 +4,6 @@ import store
 
 def start(best_buy_store: store.Store):
     while True:
-
         print("\n   Store Menu")
         print("   ----------")
         print("1. List all products in store")
@@ -15,24 +14,19 @@ def start(best_buy_store: store.Store):
         user_input = input("Please choose an option (1-4): ").strip()
 
         if user_input == "1":
-
             print("\n--- Products in Store ---")
             active_products = best_buy_store.get_all_products()
             for index, product in enumerate(active_products, start=1):
-                # Nutzen der show()-Methode aus der Product-Klasse
                 print(f"{index}. ", end="")
                 product.show()
 
         elif user_input == "2":
-            # Gesamte Produktanzahl anzeigen
             total_quantity = best_buy_store.get_total_quantity()
             print(f"\nTotal amount of items in store: {total_quantity}")
 
         elif user_input == "3":
-            # Eine Bestellung aufgeben
             print("\n--- Make an Order ---")
             active_products = best_buy_store.get_all_products()
-
 
             for index, product in enumerate(active_products, start=1):
                 print(f"{index}. ", end="")
@@ -71,7 +65,6 @@ def start(best_buy_store: store.Store):
                 print("\nOrder canceled. Cart is empty.")
 
         elif user_input == "4":
-
             print("\nThank you for shopping at Best Buy! Goodbye!")
             break
         else:
@@ -79,17 +72,17 @@ def start(best_buy_store: store.Store):
 
 
 def main():
-
+    # Exakt das von dir geforderte neue Inventar-Setup:
     product_list = [
         products.Product("MacBook Air M2", price=1450, quantity=100),
         products.Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-        products.Product("Google Pixel 7", price=500, quantity=250)
+        products.Product("Google Pixel 7", price=500, quantity=250),
+        products.NonStockedProduct("Windows License", price=125),
+        products.LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
     ]
-
-    # Store initialisieren
     best_buy = store.Store(product_list)
 
-    # UI starten
+    # Startet die Benutzeroberfläche mit dem neuen Lagerbestand
     start(best_buy)
 
 
