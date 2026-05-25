@@ -11,6 +11,17 @@ class Product:
         self.price = price
         self.quantity = quantity
         self.active = True
+        self.promotion = None  # Standardmäßig keine Aktion zugewiesen
+
+    # Getter & Setter für Promotions
+    def get_promotion(self):
+        return self.promotion
+
+    def set_promotion(self, promotion):
+        self.promotion = promotion
+
+    def remove_promotion(self):
+        self.promotion = None
 
     def get_quantity(self) -> int:
         return self.quantity
@@ -32,7 +43,9 @@ class Product:
         self.active = False
 
     def show(self):
-        print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}")
+        # Zeigt die Aktion an, falls eine aktiv ist
+        promo_info = f" (Promotion: {self.promotion.name})" if self.promotion else ""
+        print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}{promo_info}")
 
     def buy(self, quantity: int) -> float:
         if quantity <= 0:
@@ -40,7 +53,12 @@ class Product:
         if quantity > self.quantity:
             raise ValueError(f"Nicht genug Bestand. Es sind nur {self.quantity} Stück verfügbar.")
 
-        total_price = self.price * quantity
+        # Wenn eine Aktion existiert, berechnet diese den Preis. Sonst der Standardweg.
+        if self.promotion:
+            total_price = self.promotion.apply_promotion(self, quantity)
+        else:
+            total_price = self.price * quantity
+
         self.set_quantity(self.quantity - quantity)
         return float(total_price)
 
@@ -48,23 +66,26 @@ class Product:
 class NonStockedProduct(Product):
     def __init__(self, name: str, price: float):
         super().__init__(name, price, quantity=0)
-        # Verhindert, dass das Produkt wegen der Menge 0 inaktiv startet
         self.active = True
 
     def set_quantity(self, quantity: int):
         pass
 
     def is_active(self) -> bool:
-        # Digitale Lizenzen sind immer aktiv und verfügbar
         return True
 
     def buy(self, quantity: int) -> float:
         if quantity <= 0:
             raise ValueError("Die Kaufmenge muss größer als 0 sein.")
+
+        # Auch hier Promotion berücksichtigen
+        if self.promotion:
+            return float(self.promotion.apply_promotion(self, quantity))
         return float(self.price * quantity)
 
     def show(self):
-        print(f"{self.name}, Price: {self.price}, Quantity: Unlimited")
+        promo_info = f" (Promotion: {self.promotion.name})" if self.promotion else ""
+        print(f"{self.name}, Price: {self.price}, Quantity: Unlimited{promo_info}")
 
 
 class LimitedProduct(Product):
@@ -80,4 +101,5 @@ class LimitedProduct(Product):
         return super().buy(quantity)
 
     def show(self):
-        print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, Max per order: {self.maximum}")
+        promo_info = f" (Promotion: {self.promotion.name})" if self.promotion else ""
+        print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, Max per order: {self.maximum}{promo_info}")
